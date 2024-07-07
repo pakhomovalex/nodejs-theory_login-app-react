@@ -8,7 +8,7 @@ const AuthContext = React.createContext({
   isChecked: false,
   currentUser: null as User | null,
   checkAuth: async () => {},
-  activate: async (_token: string) => {},
+  activate: async (_email: string, _token: string) => {},
   login: async (_email: string, _password: string) => {},
   logout: async () => {},
 });
@@ -18,8 +18,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isChecked, setChecked] = useState(true);
 
-  async function activate(token: string) {
-    const { accessToken, user } = await authService.activate(token);
+  async function activate(email: string, token: string) {
+    const { accessToken, user } = await authService.activate(email, token);
 
     accessTokenService.save(accessToken);
     setCurrentUser(user);

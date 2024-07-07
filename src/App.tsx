@@ -95,7 +95,7 @@ export function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="sign-up" element={<RegistrationPage />} />
             <Route
-              path="activate/:activationToken"
+              path="activate/:email/:activationToken"
               element={<AccountActivationPage />}
             />
             <Route path="login" element={<LoginPage />} />
