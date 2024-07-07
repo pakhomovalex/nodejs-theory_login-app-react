@@ -30,6 +30,16 @@ export function App() {
     return <Loader />;
   }
 
+  const handleLogout = () => {
+    logout()
+      .then(() => {
+        navigate('/');
+      })
+      .catch((error: AxiosError<{ message?: string }>) => {
+        setError(error.response?.data?.message ?? '');
+      });
+  };
+
   return (
     <>
       <nav
@@ -53,15 +63,7 @@ export function App() {
               {currentUser ? (
                 <button
                   className="button is-light has-text-weight-bold"
-                  onClick={() => {
-                    logout()
-                      .then(() => {
-                        navigate('/');
-                      })
-                      .catch((error: AxiosError<{ message?: string }>) => {
-                        setError(error.response?.data?.message ?? '');
-                      });
-                  }}
+                  onClick={handleLogout}
                 >
                   Log out
                 </button>
