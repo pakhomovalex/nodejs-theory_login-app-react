@@ -8,21 +8,21 @@ import { AxiosError } from 'axios';
 import { usePageError } from '../hooks/usePageError';
 import { useAuth } from '../components/AuthContext';
 
-const EMAIL_PATTERN = /^[\w.+-]+@([\w-]+\.){1,3}[\w-]{2,}$/;
+type RegistrationError = AxiosError<{
+  errors?: { email?: string; password?: string };
+  message: string;
+}>;
 
 function validateEmail(value: string) {
+  const EMAIL_PATTERN = /^[\w.+-]+@([\w-]+\.){1,3}[\w-]{2,}$/;
+
   if (!value) return 'Email is required';
   if (!EMAIL_PATTERN.test(value)) return 'Email is not valid';
 }
 
 const validatePassword = (value: string) => {
-  if (!value) {
-    return 'Password is required';
-  }
-
-  if (value.length < 6) {
-    return 'At least 6 characters';
-  }
+  if (!value) return 'Password is required';
+  if (value.length < 6) return 'At least 6 characters';
 };
 
 export const RegistrationPage = () => {
@@ -31,9 +31,9 @@ export const RegistrationPage = () => {
 
   const { isChecked, currentUser } = useAuth();
 
-if (isChecked && currentUser) {
-  return <Navigate to="/" />;
-}
+  if (isChecked && currentUser) {
+    return <Navigate to="/" />;
+  }
 
   if (registered) {
     return (
@@ -57,37 +57,19 @@ if (isChecked && currentUser) {
 
           authService
             .register(email, password)
-            .then(() => {
-              setRegistered(true);
+            .then(() => setRegistered(true))
+            .catch((error: RegistrationError) => {
+              if (error.message) setError(error.message);
+              if (!error.response?.data) return;
+
+              const { errors, message } = error.response.data;
+
+              formikHelpers.setFieldError('email', errors?.email);
+              formikHelpers.setFieldError('password', errors?.password);
+
+              if (message) setError(message);
             })
-            .catch(
-              (
-                error: AxiosError<{
-                  errors?: { email?: string; password?: string };
-                  message: string;
-                }>,
-              ) => {
-                if (error.message) {
-                  setError(error.message);
-                }
-
-                if (!error.response?.data) {
-                  return;
-                }
-
-                const { errors, message } = error.response.data;
-
-                formikHelpers.setFieldError('email', errors?.email);
-                formikHelpers.setFieldError('password', errors?.password);
-
-                if (message) {
-                  setError(message);
-                }
-              },
-            )
-            .finally(() => {
-              formikHelpers.setSubmitting(false);
-            });
+            .finally(() => formikHelpers.setSubmitting(false));
         }}
       >
         {({ touched, errors, isSubmitting }) => (
