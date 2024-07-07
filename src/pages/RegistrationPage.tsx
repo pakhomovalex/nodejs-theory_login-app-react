@@ -1,28 +1,48 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import cn from 'classnames';
 
-import { usePageError } from '../hooks/usePageError.js';
-import { useAuth } from '../components/AuthContext.jsx';
+import { authService } from '../services/authService';
+import { AxiosError } from 'axios';
+import { usePageError } from '../hooks/usePageError';
+import { useAuth } from '../components/AuthContext';
 
 const EMAIL_PATTERN = /^[\w.+-]+@([\w-]+\.){1,3}[\w-]{2,}$/;
 
-function validateEmail(value) {
+function validateEmail(value: string) {
   if (!value) return 'Email is required';
   if (!EMAIL_PATTERN.test(value)) return 'Email is not valid';
 }
 
-function validatePassword(value) {
-  if (!value) return 'Password is required';
-  if (value.length < 6) return 'At least 6 characters';
+const validatePassword = (value: string) => {
+  if (!value) {
+    return 'Password is required';
+  }
+
+  if (value.length < 6) {
+    return 'At least 6 characters';
+  }
+};
+
+export const RegistrationPage = () => {
+  const [error, setError] = usePageError('');
+  const [registered, setRegistered] = useState(false);
+
+  const { isChecked, currentUser } = useAuth();
+
+if (isChecked && currentUser) {
+  return <Navigate to="/" />;
 }
 
-export const LoginPage = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const [error, setError] = usePageError('');
-  const { login } = useAuth();
+  if (registered) {
+    return (
+      <section className="">
+        <h1 className="title">Check your email</h1>
+        <p>We have sent you an email with the activation link</p>
+      </section>
+    );
+  }
 
   return (
     <>
@@ -32,19 +52,47 @@ export const LoginPage = () => {
           password: '',
         }}
         validateOnMount={true}
-        onSubmit={({ email, password }) => {
-          return login({ email, password })
+        onSubmit={({ email, password }, formikHelpers) => {
+          formikHelpers.setSubmitting(true);
+
+          authService
+            .register(email, password)
             .then(() => {
-              navigate(location.state?.from?.pathname || '/');
+              setRegistered(true);
             })
-            .catch(error => {
-              setError(error.response?.data?.message);
+            .catch(
+              (
+                error: AxiosError<{
+                  errors?: { email?: string; password?: string };
+                  message: string;
+                }>,
+              ) => {
+                if (error.message) {
+                  setError(error.message);
+                }
+
+                if (!error.response?.data) {
+                  return;
+                }
+
+                const { errors, message } = error.response.data;
+
+                formikHelpers.setFieldError('email', errors?.email);
+                formikHelpers.setFieldError('password', errors?.password);
+
+                if (message) {
+                  setError(message);
+                }
+              },
+            )
+            .finally(() => {
+              formikHelpers.setSubmitting(false);
             });
         }}
       >
         {({ touched, errors, isSubmitting }) => (
           <Form className="box">
-            <h1 className="title">Log in</h1>
+            <h1 className="title">Sign up</h1>
             <div className="field">
               <label htmlFor="email" className="label">
                 Email
@@ -117,12 +165,12 @@ export const LoginPage = () => {
                 className={cn('button is-success has-text-weight-bold', {
                   'is-loading': isSubmitting,
                 })}
-                disabled={isSubmitting || errors.email || errors.password}
+                disabled={isSubmitting || !!errors.email || !!errors.password}
               >
-                Log in
+                Sign up
               </button>
             </div>
-            Do not have an account? <Link to="/sign-up">Sign up</Link>
+            Already have an account? <Link to="/login">Log in</Link>
           </Form>
         )}
       </Formik>

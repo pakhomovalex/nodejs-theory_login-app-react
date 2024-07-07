@@ -12,4 +12,4 @@ export const Root = () => (
   </AuthProvider>
 );
 
-createRoot(document.getElementById('root')).render(<Root />);
+createRoot(document.getElementById('root')!).render(<Root />);

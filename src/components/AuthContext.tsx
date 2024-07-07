@@ -1,22 +1,25 @@
 import React, { useMemo, useState } from 'react';
-import { accessTokenService } from '../services/accessTokenService.js';
-import { authService } from '../services/authService.js';
+import { accessTokenService } from '../services/accessTokenService';
+import { authService } from '../services/authService';
+import { User } from '../types/user';
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const AuthContext = React.createContext({
   isChecked: false,
-  currentUser: null,
-  checkAuth: () => {},
-  activate: () => {},
-  login: () => {},
-  logout: () => {},
+  currentUser: null as User | null,
+  checkAuth: async () => {},
+  activate: async (_token: string) => {},
+  login: async (_email: string, _password: string) => {},
+  logout: async () => {},
 });
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
-export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isChecked, setChecked] = useState(true);
 
-  async function activate(activationToken) {
-    const { accessToken, user } = await authService.activate(activationToken);
+  async function activate(token: string) {
+    const { accessToken, user } = await authService.activate(token);
 
     accessTokenService.save(accessToken);
     setCurrentUser(user);
@@ -35,7 +38,7 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  async function login({ email, password }) {
+  async function login(email: string, password: string) {
     const { accessToken, user } = await authService.login(email, password);
 
     accessTokenService.save(accessToken);
@@ -64,4 +67,5 @@ export const AuthProvider = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => React.useContext(AuthContext);

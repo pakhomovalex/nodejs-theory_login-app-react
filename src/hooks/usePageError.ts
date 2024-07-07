@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export const usePageError = initialError => {
+export const usePageError = (initialError: string) => {
   const [error, setError] = useState(initialError);
 
   useEffect(() => {
@@ -11,5 +11,5 @@ export const usePageError = initialError => {
     return () => clearTimeout(timerId);
   }, [error]);
 
-  return [error, setError];
+  return [error, setError] as const;
 };

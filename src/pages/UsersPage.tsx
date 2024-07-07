@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
-import { usePageError } from '../hooks/usePageError.js';
-import { userService } from '../services/userService.js';
+import { usePageError } from '../hooks/usePageError';
+import { userService } from '../services/userService';
+import { User } from '../types/user';
+import { AxiosError } from 'axios';
 
 export const UsersPage = () => {
   const [error, setError] = usePageError('');
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     userService
       .getAll()
       .then(setUsers)
-      .catch(error => setError(error.message));
+      .catch((error: AxiosError) => {
+        setError(error.message);
+      });
   }, []);
 
   return (

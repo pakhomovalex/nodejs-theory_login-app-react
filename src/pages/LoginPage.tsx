@@ -1,39 +1,32 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import cn from 'classnames';
 
-import { authService } from '../services/authService.js';
-import { usePageError } from '../hooks/usePageError.js';
+import { usePageError } from '../hooks/usePageError';
+import { useAuth } from '../components/AuthContext';
+import { AxiosError } from 'axios';
 
 const EMAIL_PATTERN = /^[\w.+-]+@([\w-]+\.){1,3}[\w-]{2,}$/;
 
-function validateEmail(value) {
+function validateEmail(value: string) {
   if (!value) return 'Email is required';
   if (!EMAIL_PATTERN.test(value)) return 'Email is not valid';
 }
 
-const validatePassword = value => {
-  if (!value) {
-    return 'Password is required';
-  }
+function validatePassword(value: string) {
+  if (!value) return 'Password is required';
+  if (value.length < 6) return 'At least 6 characters';
+}
 
-  if (value.length < 6) {
-    return 'At least 6 characters';
-  }
-};
+export const LoginPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-export const RegistrationPage = () => {
   const [error, setError] = usePageError('');
-  const [registered, setRegistered] = useState(false);
+  const { login, isChecked, currentUser } = useAuth();
 
-  if (registered) {
-    return (
-      <section className="">
-        <h1 className="title">Check your email</h1>
-        <p>We have sent you an email with the activation link</p>
-      </section>
-    );
+  if (isChecked && currentUser) {
+    return <Navigate to="/" />;
   }
 
   return (
@@ -44,40 +37,20 @@ export const RegistrationPage = () => {
           password: '',
         }}
         validateOnMount={true}
-        onSubmit={({ email, password }, formikHelpers) => {
-          formikHelpers.setSubmitting(true);
-
-          authService
-            .register(email, password)
+        onSubmit={({ email, password }) => {
+          return login(email, password)
             .then(() => {
-              setRegistered(true);
+              const state = location.state as { from?: Location };
+              navigate(state.from?.pathname ?? '/');
             })
-            .catch(error => {
-              if (error.message) {
-                setError(error.message);
-              }
-
-              if (!error.response?.data) {
-                return;
-              }
-
-              const { errors, message } = error.response.data;
-
-              formikHelpers.setFieldError('email', errors?.email);
-              formikHelpers.setFieldError('password', errors?.password);
-
-              if (message) {
-                setError(message);
-              }
-            })
-            .finally(() => {
-              formikHelpers.setSubmitting(false);
+            .catch((error: AxiosError<{ message?: string }>) => {
+              setError(error.response?.data?.message ?? '');
             });
         }}
       >
         {({ touched, errors, isSubmitting }) => (
           <Form className="box">
-            <h1 className="title">Sign up</h1>
+            <h1 className="title">Log in</h1>
             <div className="field">
               <label htmlFor="email" className="label">
                 Email
@@ -150,12 +123,12 @@ export const RegistrationPage = () => {
                 className={cn('button is-success has-text-weight-bold', {
                   'is-loading': isSubmitting,
                 })}
-                disabled={isSubmitting || errors.email || errors.password}
+                disabled={isSubmitting || !!errors.email || !!errors.password}
               >
-                Sign up
+                Log in
               </button>
             </div>
-            Already have an account? <Link to="/login">Log in</Link>
+            Do not have an account? <Link to="/sign-up">Sign up</Link>
           </Form>
         )}
       </Formik>

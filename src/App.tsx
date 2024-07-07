@@ -5,22 +5,24 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import 'bulma/css/bulma.css';
 import './styles.scss';
 
+import { useAuth } from './components/AuthContext';
+import { usePageError } from './hooks/usePageError';
+import { Loader } from './components/Loader';
+import { HomePage } from './pages/HomePage';
+import { RegistrationPage } from './pages/RegistrationPage';
 import { AccountActivationPage } from './pages/AccountActivationPage';
 import { LoginPage } from './pages/LoginPage';
-import { RegistrationPage } from './pages/RegistrationPage';
 import { RequireAuth } from './components/RequireAuth';
 import { UsersPage } from './pages/UsersPage';
-import { Loader } from './components/Loader.jsx';
-import { HomePage } from './pages/HomePage.jsx';
-import { usePageError } from './hooks/usePageError.js';
-import { useAuth } from './components/AuthContext.jsx';
+import { AxiosError } from 'axios';
 
 export function App() {
   const navigate = useNavigate();
-  const [error, setError] = usePageError();
+  const [error, setError] = usePageError('');
   const { isChecked, currentUser, logout, checkAuth } = useAuth();
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     checkAuth();
   }, []);
 
@@ -56,8 +58,8 @@ export function App() {
                       .then(() => {
                         navigate('/');
                       })
-                      .catch(error => {
-                        setError(error.response?.data?.message);
+                      .catch((error: AxiosError<{ message?: string }>) => {
+                        setError(error.response?.data?.message ?? '');
                       });
                   }}
                 >

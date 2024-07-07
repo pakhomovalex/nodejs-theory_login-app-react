@@ -1,8 +1,9 @@
+import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { Loader } from './Loader.jsx';
-import { useAuth } from './AuthContext.jsx';
+import { Loader } from './Loader';
+import { useAuth } from './AuthContext';
 
-export const RequireNonAuth = ({ children }) => {
+export const RequireNonAuth = ({ children }: { children?: React.ReactNode }) => {
   const { isChecked, currentUser } = useAuth();
 
   if (!isChecked) {
@@ -13,5 +14,5 @@ export const RequireNonAuth = ({ children }) => {
     return <Navigate to="/" replace />;
   }
 
-  return children || <Outlet />;
+  return children ?? <Outlet />;
 };

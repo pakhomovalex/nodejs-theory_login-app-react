@@ -1,20 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { useAuth } from '../components/AuthContext.jsx';
-import { Loader } from '../components/Loader.jsx';
+import { useAuth } from '../components/AuthContext';
+import { Loader } from '../components/Loader';
+import { AxiosError } from 'axios';
 
 export const AccountActivationPage = () => {
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
 
   const { activate } = useAuth();
-  const { activationToken } = useParams();
+  const { activationToken = '' } = useParams();
 
   useEffect(() => {
     activate(activationToken)
-      .catch(error => {
-        setError(error.response?.data?.message || `Wrong activation link`);
+      .catch((error: AxiosError<{ message?: string }>) => {
+        setError(error.response?.data?.message ?? `Wrong activation link`);
       })
       .finally(() => setDone(true));
   }, []);
