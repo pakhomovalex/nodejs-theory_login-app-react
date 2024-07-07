@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // this client does not have auth interceptors
 export const authClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL as string,
+  baseURL: `${import.meta.env.VITE_API_URL}/auth`,
   withCredentials: true,
 });
 
