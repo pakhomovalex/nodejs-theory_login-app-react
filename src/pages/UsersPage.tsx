@@ -3,8 +3,13 @@ import { usePageError } from '../hooks/usePageError';
 import { userService } from '../services/userService';
 import { User } from '../types/user';
 import { AxiosError } from 'axios';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../components/AuthContext';
 
 export const UsersPage = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [error, setError] = usePageError('');
   const [users, setUsers] = useState<User[]>([]);
 
@@ -12,8 +17,20 @@ export const UsersPage = () => {
     userService
       .getAll()
       .then(setUsers)
-      .catch((error: AxiosError) => {
-        setError(error.message);
+      .catch(async (error: AxiosError) => {
+        if (error.response?.status !== 401) {
+          setError(error.message);
+          return;
+        }
+
+        await logout();
+
+        navigate('/login', {
+          state: {
+            from: location,
+            replace: true,
+          },
+        });
       });
   }, []);
 
