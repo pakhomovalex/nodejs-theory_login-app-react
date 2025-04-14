@@ -15,6 +15,8 @@ import { LoginPage } from './pages/LoginPage';
 import { RequireAuth } from './components/RequireAuth';
 import { UsersPage } from './pages/UsersPage';
 import { AxiosError } from 'axios';
+import { ResetPage } from './pages/ResetPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 
 export function App() {
   const navigate = useNavigate();
@@ -22,8 +24,10 @@ export function App() {
   const { isChecked, currentUser, logout, checkAuth } = useAuth();
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    checkAuth();
+    if (document.cookie.includes('refreshToken')) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      checkAuth();
+    }
   }, []);
 
   if (!isChecked) {
@@ -52,8 +56,8 @@ export function App() {
             Home
           </NavLink>
 
-          <NavLink to="/users" className="navbar-item">
-            Users
+          <NavLink to="/user" className="navbar-item">
+            User
           </NavLink>
         </div>
 
@@ -99,10 +103,13 @@ export function App() {
               element={<AccountActivationPage />}
             />
             <Route path="login" element={<LoginPage />} />
+            <Route path='resetpassword' element={<ResetPage />} />
+            <Route path='resetpassword/:email/:resetPasswordToken' element={<ResetPasswordPage />} />
 
             <Route path="/" element={<RequireAuth />}>
-              <Route path="users" element={<UsersPage />} />
+              <Route path="user" element={<UsersPage />} />
             </Route>
+            <Route path='*' element={<h1>Not Found</h1>} />
           </Routes>
         </section>
 

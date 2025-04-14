@@ -129,6 +129,7 @@ export const LoginPage = () => {
               </button>
             </div>
             Do not have an account? <Link to="/sign-up">Sign up</Link>
+            Do not remember password? <Link to='/resetpassword'>Reset password</Link>
           </Form>
         )}
       </Formik>

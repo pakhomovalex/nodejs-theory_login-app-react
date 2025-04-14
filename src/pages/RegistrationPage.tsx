@@ -9,7 +9,7 @@ import { usePageError } from '../hooks/usePageError';
 import { useAuth } from '../components/AuthContext';
 
 type RegistrationError = AxiosError<{
-  errors?: { email?: string; password?: string };
+  errors?: { email?: string; password?: string, name?: string };
   message: string;
 }>;
 
@@ -50,13 +50,14 @@ export const RegistrationPage = () => {
         initialValues={{
           email: '',
           password: '',
+          name: '',
         }}
         validateOnMount={true}
-        onSubmit={({ email, password }, formikHelpers) => {
+        onSubmit={({ email, password, name }, formikHelpers) => {
           formikHelpers.setSubmitting(true);
 
           authService
-            .register(email, password)
+            .register(email, password, name)
             .then(() => setRegistered(true))
             .catch((error: RegistrationError) => {
               if (error.message) setError(error.message);
@@ -66,6 +67,7 @@ export const RegistrationPage = () => {
 
               formikHelpers.setFieldError('email', errors?.email);
               formikHelpers.setFieldError('password', errors?.password);
+              formikHelpers.setFieldError('name', errors?.name);
 
               if (message) setError(message);
             })
@@ -139,6 +141,37 @@ export const RegistrationPage = () => {
                 <p className="help is-danger">{errors.password}</p>
               ) : (
                 <p className="help">At least 6 characters</p>
+              )}
+            </div>
+            <div className="field">
+              <label htmlFor="email" className="label">
+                Name
+              </label>
+
+              <div className="control has-icons-left has-icons-right">
+                <Field
+                  name="name"
+                  type="text"
+                  id="name"
+                  placeholder="John"
+                  className={cn('input', {
+                    'is-danger': touched.name && errors.name,
+                  })}
+                />
+
+                <span className="icon is-small is-left">
+                  <i className="fa fa-envelope"></i>
+                </span>
+
+                {touched.name && errors.name && (
+                  <span className="icon is-small is-right has-text-danger">
+                    <i className="fas fa-exclamation-triangle"></i>
+                  </span>
+                )}
+              </div>
+
+              {touched.name && errors.name && (
+                <p className="help is-danger">{errors.name}</p>
               )}
             </div>
             <div className="field">

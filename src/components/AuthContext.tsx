@@ -7,10 +7,10 @@ import { User } from '../types/user';
 const AuthContext = React.createContext({
   isChecked: false,
   currentUser: null as User | null,
-  checkAuth: async () => {},
-  activate: async (_email: string, _token: string) => {},
-  login: async (_email: string, _password: string) => {},
-  logout: async () => {},
+  checkAuth: async () => { },
+  activate: async (_email: string, _token: string) => { },
+  login: async (_email: string, _password: string) => { },
+  logout: async () => { },
 });
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   async function checkAuth() {
+    
     try {
       const { accessToken, user } = await authService.refresh();
 
