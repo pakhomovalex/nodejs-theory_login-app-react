@@ -1,4 +1,4 @@
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import cn from 'classnames';
 
@@ -20,7 +20,6 @@ function validatePassword(value: string) {
 
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [error, setError] = usePageError('');
   const { login, isChecked, currentUser } = useAuth();
@@ -40,8 +39,7 @@ export const LoginPage = () => {
         onSubmit={({ email, password }) => {
           return login(email, password)
             .then(() => {
-              const state = location.state as { from?: Location };
-              navigate(state.from?.pathname ?? '/');
+              navigate('/user');
             })
             .catch((error: AxiosError<{ message?: string }>) => {
               setError(error.response?.data?.message ?? '');

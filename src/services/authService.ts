@@ -11,8 +11,8 @@ export const authService = {
     return client.post('/registration', { email, password, name });
   },
 
-  activate: (email: string, token: string): Promise<AuthData> => {
-    return client.get(`/activate/${email}/${token}`);
+  activate: (token: string): Promise<AuthData> => {
+    return client.get(`/activate/${token}`);
   },
 
   login: (email: string, password: string): Promise<AuthData> => {

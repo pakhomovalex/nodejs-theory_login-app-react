@@ -99,7 +99,7 @@ export function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="sign-up" element={<RegistrationPage />} />
             <Route
-              path="activate/:email/:activationToken"
+              path="activate/:activationToken"
               element={<AccountActivationPage />}
             />
             <Route path="login" element={<LoginPage />} />
